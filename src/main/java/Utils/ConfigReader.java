@@ -68,4 +68,6 @@ public class ConfigReader {
     public static String getLoginURL(){
         return getProperty("login.url");
     }
+
+    public static String getHomeURL(){ return getProperty("home.url");}
 }

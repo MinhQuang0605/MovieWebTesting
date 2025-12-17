@@ -6,6 +6,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
@@ -15,26 +16,51 @@ import java.time.Duration;
 
 public class BaseTest {
     protected WebDriver driver;
+  //  protected WebDriver driver2;
     protected ExtentTest extentTest;
-
+    protected ScreenshotCleaner screenshotCleaner;
 //    @BeforeSuite
 //    public void setUpSuite(){
 //        ExtendReportManager.getInstance();
 //    }
+    @BeforeSuite
+    public void setUpSuite(){
 
+        ExtendReportManager.getInstance();
+}
     @AfterSuite
     public void tearDownSuite(){
-        //ExtendReportManager.flushreport();
+        ScreenshotCleaner.deleteEmptyScreenShotFolder();
+        ExtendReportManager.flushReport();
     }
     @BeforeMethod
-    public void setUp(){
+    public void setup(ITestResult result) {
+        //Tao test case trong report
+        String testName = result.getMethod().getMethodName();
+        String testDescription = result.getMethod().getDescription();
+        if(testDescription == null || testDescription.isEmpty()){
+            testDescription = "test case " + testName;
+        }
+        extentTest = ExtendReportManager.createTest(testName, testDescription);
+
+//        B1: cấu hình ChromeDriver
+        extentTest.info("Cau hinh chrome driver");
         WebDriverManager.chromedriver().setup();
-        ChromeOptions options= new ChromeOptions();
 
+//        B2: cấu hình các tùy chọn
+        extentTest.info("tang kich co man hinh toi da");
+        ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
-        driver= new ChromeDriver(options);
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+//        B3: khởi tạo ChromeDriver
+        extentTest.info("Khoi tao chrome driver");
+        driver = new ChromeDriver(options);
+
+
+//        B4: Doi khoang 10s
+        extentTest.info("doi khoan 5s");
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+
     }
 
     @AfterMethod
@@ -42,5 +68,6 @@ public class BaseTest {
         if(driver != null){
             driver.quit();
         }
+
     }
 }

@@ -1,0 +1,4 @@
+username,password,expected
+JohnWok,123456,true
+Admin,admin123,false
+invalid_user,invalid_password,false
