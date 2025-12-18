@@ -1,13 +1,18 @@
 package Utils;
 
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 
 public class ScreenShotHelper {
     private  WebDriver driver;
+    private WebDriverWait wait;
     private  int stepsCount=0;
     private  String screenshotDIR;
     private String PageName;
@@ -16,6 +21,7 @@ public class ScreenShotHelper {
     public ScreenShotHelper(WebDriver driver, String PageName){
         this.driver = driver;
         this.js = (JavascriptExecutor) driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));;
         //setup take screenshot
         //reset step counts và tao thu muc screenshot moi cho tung test case
         stepsCount=0;
@@ -51,8 +57,15 @@ public class ScreenShotHelper {
         Remmovehightlight(element);
     }
 
-    public void ExtraCapture(String StepName){
-        File picture = new File(screenshotDIR + "Step_"+ ++stepsCount+ " "+ StepName+ ".png");
+    public void ExtraCapture(String StepName) throws Exception{
+        Thread.sleep(200);
+        StepName = StepName.replaceAll("[\\\\/:*?\"<>|]", "_");
+        File picture = new File(screenshotDIR + "Step_"+ ++stepsCount + " "+ StepName+ ".png");
+//        boolean success = ((TakesScreenshot) driver)
+//                .getScreenshotAs(OutputType.FILE)
+//                .renameTo(picture);
+//        String dir = screenshotDIR + "Step_"+ ++stepsCount + " "+ StepName+ ".png";
+//        System.out.println("Capture first time success: " + success +" With dir: "+dir);
         ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE).renameTo(picture);
     }
 

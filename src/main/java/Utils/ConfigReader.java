@@ -46,8 +46,14 @@ public class ConfigReader {
         return getProperty("valid.username", "Admin");
     }
 
+    public static String getUsername2(){
+        return getProperty("valid.username2", "Admin");
+    }
     public static String getPassWord(){
         return getProperty("valid.password", "test");
+    }
+    public static String getPassWord2(){
+        return getProperty("valid.password2", "test");
     }
     public static String getInvalidUsername(){
         return getProperty("invalid.username", "Admin");

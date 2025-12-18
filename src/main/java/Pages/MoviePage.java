@@ -6,6 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.Color;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -23,13 +24,14 @@ public class MoviePage {
     private By movie1 = By.xpath("//a[   .//p[normalize-space()='01-01-2019'] " +
             "  and   .//h3[normalize-space()='12:10'] ]");
     private By PurchaseButton =  By.xpath("//span[text()='ĐẶT VÉ']/parent::button");
-    private By EmptyChair = By.xpath("//span[text()='45']/parent::button");
+    private By EmptyChair = By.xpath("//span[text()='100']/parent::button");
     //button[not(@disabled)]//span[text()='01']/parent::button
     private By TakenChair = By.xpath("//button[@disabled]//span[text()='X']/parent::button");
     //button[@disabled]//span[text()='X']/parent::button
-    private By chairs  = By.xpath("//button[not(@disabled)]//span[@class='MuiButton-label']");
+        private By chairs  = By.xpath("//button[not(@disabled)]//span[@class='MuiButton-label']");
+    private By chairs2 = By.xpath("//button[not(@disabled)]");
     private String HomeURL = ConfigReader.getHomeURL();
-    private By loginAlert = By.xpath("//div[contains(@class,'swal2-popup')]");
+    private By FailAlert = By.xpath("//div[contains(@class,'swal2-popup') and contains(@class,'swal2-icon-error')]");
 
     public MoviePage(WebDriver driver){
         this.driver = driver;
@@ -67,6 +69,8 @@ public class MoviePage {
         screenShotHelper.CaptureHighLight(purchase,"Finding purchase button");
         Thread.sleep(3000);
         purchase.click();
+        Thread.sleep(2000);
+        screenShotHelper.ExtraCapture("After Purchase Result");
     }
 
     public void findEmptyChair() throws Exception{
@@ -80,20 +84,31 @@ public class MoviePage {
         EmptySeat.click();
     }
 
-    public void findVIPEmptyChair() throws Exception{
-        wait.until(ExpectedConditions.presenceOfElementLocated(EmptyChair));
-        WebElement EmptySeat = driver.findElement(EmptyChair);
-        String bgColor = EmptySeat.getCssValue("background-color");
-        System.out.println(bgColor);
-        if (bgColor.contains("255, 165, 0, 1")) {
-            System.out.println("Ghe VIP");
-            highlightPink(EmptySeat);
-            screenShotHelper.ExtraCapture("Success finding empty VIP chair");
+    public boolean findVIPEmptyChair(int seat) throws Exception{
+        List<WebElement> chairs = driver.findElements(chairs2);
+
+        for (WebElement chair : chairs) {
+            String text = chair.getText().trim();
+
+            if (text.matches("\\d+") && Integer.parseInt(text) == seat) {
+                String bgColor = chair.getCssValue("background-color");
+                System.out.println(bgColor);
+
+                if (bgColor.contains("255, 165, 0")) {
+                    System.out.println("Ghế VIP");
+
+                    chair.click();
+                    screenShotHelper.CaptureHighLight(chair,"Success finding empty VIP chair");
+                    return true;
+                }
+
+            }
         }
-       screenShotHelper.CaptureHighLight(EmptySeat,"Fail finding VIP Chair");
-        Thread.sleep(2000);
-        EmptySeat.click();
+        screenShotHelper.ExtraCapture("Failure finding empty VIP chair");
+        return false;
+
     }
+
 
     public void findMultipleChairs(List<Integer> seats) throws Exception {
         for (WebElement chair : driver.findElements(chairs)) {
@@ -103,24 +118,30 @@ public class MoviePage {
                 highlightPink(chair);
            //     chair.click();
             }
+
         }
         screenShotHelper.ExtraCapture("All selected seats");
     }
 
-    public void SelectChair(int seat) throws Exception{
-        for (WebElement chair : driver.findElements(chairs)){
+    public boolean SelectChair(int seat) throws Exception{
+        List<WebElement> chairs = driver.findElements(this.chairs);
+
+        for (WebElement chair : chairs) {
             String text = chair.getText().trim();
-            if (text.matches("\\d+") && seat==(Integer.parseInt(text))) {
+
+            if (text.matches("\\d+") && Integer.parseInt(text) == seat) {
                 highlightPink(chair);
-                    chair.click();
+                chair.click();
+                screenShotHelper.ExtraCapture("Selected seat " + seat);
+                return true;
             }
         }
-        screenShotHelper.ExtraCapture("Selected seats: "+seat);
+        return false;
     }
 
-    public boolean  isLoginAlertDisplayed() throws Exception{
-        WebElement error = driver.findElement(loginAlert);
-        return error.isDisplayed();
+    public boolean isAlertDisplayed() {
+        return !driver.findElements(FailAlert).isEmpty()
+                && driver.findElements(FailAlert).get(0).isDisplayed();
     }
 
 

@@ -35,10 +35,10 @@ public class LoginTest extends BaseTest {
         Assert.assertTrue(currentUrl.contains("/sign-in"));
     }
 
-    //define Data Provider de doc du lieu
+
     @DataProvider(name="LoginData")
     public Object[][] getLoginData() throws Exception{
-        //B1 lay path chua file csv
+        //lay path chua file csv
         String csvPath = System.getProperty("user.dir")+ "/src/test/resources/login.csv";
         //doc file csv va convert ve 1 list data de dung cho test case
         List<LoginData> data = CsvReader.readLoginData(csvPath);

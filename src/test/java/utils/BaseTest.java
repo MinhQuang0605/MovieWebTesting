@@ -4,6 +4,7 @@ import com.aventstack.extentreports.ExtentTest;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.checkerframework.checker.units.qual.C;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.ITestResult;
@@ -13,10 +14,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BaseTest {
     protected WebDriver driver;
-  //  protected WebDriver driver2;
+    protected WebDriver driver2;
     protected ExtentTest extentTest;
     protected ScreenshotCleaner screenshotCleaner;
 //    @BeforeSuite
@@ -51,7 +54,12 @@ public class BaseTest {
         extentTest.info("tang kich co man hinh toi da");
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--start-maximized");
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("profile.password_manager_leak_detection", false);
 
+        options.setExperimentalOption("prefs", prefs);
 //        B3: khởi tạo ChromeDriver
         extentTest.info("Khoi tao chrome driver");
         driver = new ChromeDriver(options);
@@ -65,6 +73,45 @@ public class BaseTest {
 
     @AfterMethod
     public void TearDown(){
+        if(driver != null){
+            driver.quit();
+        }
+
+    }
+
+    public void setup2ndDriver(ITestResult result) {
+        //Tao test case trong report
+        String testName = result.getMethod().getMethodName();
+        String testDescription = result.getMethod().getDescription();
+        if(testDescription == null || testDescription.isEmpty()){
+            testDescription = "test case " + testName;
+        }
+        extentTest = ExtendReportManager.createTest(testName, testDescription);
+
+//        B1: cấu hình ChromeDriver
+        extentTest.info("Cau hinh chrome driver");
+        WebDriverManager.chromedriver().setup();
+
+//        B2: cấu hình các tùy chọn
+        extentTest.info("tang kich co man hinh toi da");
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("profile.password_manager_leak_detection", false);
+//        B3: khởi tạo ChromeDriver
+        extentTest.info("Khoi tao chrome driver");
+        driver2 = new ChromeDriver(options);
+
+
+//        B4: Doi khoang 10s
+        extentTest.info("doi khoan 5s");
+        driver2.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+
+    }
+
+    public void TearDownManual(WebDriver driver){
         if(driver != null){
             driver.quit();
         }
